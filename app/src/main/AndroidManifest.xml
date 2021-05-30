@@ -32,6 +32,10 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+        <activity android:name=".OffreActivity"></activity>
+        <activity android:name=".HomeActivity"></activity>
+        <activity android:name=".ProfileActivity"></activity>
+
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
