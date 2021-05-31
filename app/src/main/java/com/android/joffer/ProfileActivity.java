@@ -3,6 +3,7 @@ package com.android.joffer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,10 +14,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import com.android.joffer.DAO.Users;
+import com.google.firebase.database.ValueEventListener;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ProfileActivity extends AppCompatActivity {
     TextView profileNameTextView;
@@ -46,8 +52,30 @@ public class ProfileActivity extends AppCompatActivity {
         profileNameTextView.setText( getProfileName() );
         profileEmailTextView.setText(getProfileEmail());
 
-        if(getProfilePhone() != null) profilePhone.setText(getProfilePhone());
-        if(getProfileCity() != null) profileCity.setText(getProfileCity());
+        String CUID = currentUser.getUid();
+        DatabaseReference UIDRef = database.getReference().child("Users").child(CUID);
+
+        UIDRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String phone = dataSnapshot.child("phone").getValue(String.class);
+                String city = dataSnapshot.child("city").getValue(String.class);
+                profilePhone.setText(phone);
+                profileCity.setText(city);
+                Log.d("Search", "Value is: " + phone);
+                Log.d("Search", "Value is: " + city);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w("search", "Failed to read value.", error.toException());
+            }
+        });
+
 
         saveProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,14 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private String getProfilePhone(){
 
-        return "NUll";
-    }
-
-    private String getProfileCity(){
-        return "Null";
-    }
     private String getProfileEmail(){
         String Email = (String)currentUser.getEmail();
         return Email;
