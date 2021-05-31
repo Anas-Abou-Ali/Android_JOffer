@@ -13,6 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import com.android.joffer.DAO.Users;
 
 public class ProfileActivity extends AppCompatActivity {
     TextView profileNameTextView;
@@ -20,6 +24,9 @@ public class ProfileActivity extends AppCompatActivity {
     TextView profileEmailTextView;
     EditText profileCity;
     Button saveProfileButton;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference().child("Users");
 
     FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -40,6 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
         profileEmailTextView.setText(getProfileEmail());
 
         if(getProfilePhone() != null) profilePhone.setText(getProfilePhone());
+        if(getProfileCity() != null) profileCity.setText(getProfileCity());
 
         saveProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,24 +56,36 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
+
     private String getProfilePhone(){
 
-        return "0636108193";
+        return "NUll";
     }
 
+    private String getProfileCity(){
+        return "Null";
+    }
     private String getProfileEmail(){
         String Email = (String)currentUser.getEmail();
-        return "Your Email :" +Email;
+        return Email;
     }
 
     private String getProfileName(){
         String Name = (String)currentUser.getDisplayName();
 
-        return "Your Name is :"+Name;
+        return Name;
     }
     public void saveProfile(){
-        String userPhone = ""+profilePhone.getText();
-        String userCity = ""+profileCity.getText();
+
+        Users user = new Users();
+        String userPhone = profilePhone.getText().toString().trim();
+        String userCity = profileCity.getText().toString().trim();
+        user.setUID(currentUser.getUid());
+        user.setEmail(getProfileEmail().trim());
+        user.setName(getProfileName().trim());
+        user.setCity(userCity.trim());
+        user.setPhone(userPhone.trim());
+        myRef.child(user.getUID().toString()).setValue(user);
         Toast.makeText(this,userPhone,Toast.LENGTH_LONG).show();
         Toast.makeText(this,userCity,Toast.LENGTH_LONG).show();
     }
